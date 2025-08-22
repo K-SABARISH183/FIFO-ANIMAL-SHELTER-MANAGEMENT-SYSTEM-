@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Animal structure
+typedef struct Animal {
+    int id;
+    char name[30];
+    char species[30];
+    struct Animal* next;
+} Animal;
+
+// Queue for managing animals
+typedef struct {
+    Animal* front;
+    Animal* rear;
+} AnimalQueue;
+
+// Function prototypes
+void enqueue(AnimalQueue* queue, int id, char* name, char* species);
+Animal* dequeue(AnimalQueue* queue);
+void listAnimals(AnimalQueue* queue);
+void menu();
+
+// Main function
+int main() {
+    AnimalQueue queue = {NULL, NULL};
+    int choice, id;
+    char name[30], species[30];
+
+    while (1) {
+        menu();
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter animal ID: ");
+                scanf("%d", &id);
+                printf("Enter animal name: ");
+                scanf("%s", name);
+                printf("Enter animal species: ");
+                scanf("%s", species);
+                enqueue(&queue, id, name, species);
+                break;
+            case 2:
+                if (queue.front == NULL) {
+                    printf("No animals to remove.\n");
+                } else {
+                    Animal* removedAnimal = dequeue(&queue);
+                    printf("Removed Animal - ID: %d, Name: %s, Species: %s\n",
+                           removedAnimal->id, removedAnimal->name, removedAnimal->species);
+                    free(removedAnimal);
+                }
+                break;
+            case 3:
+                listAnimals(&queue);
+                break;
+            case 4:
+                printf("Exiting the program.\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+// Enqueue function for adding an animal
+void enqueue(AnimalQueue* queue, int id, char* name, char* species) {
+    Animal* newAnimal = (Animal*)malloc(sizeof(Animal));
+    newAnimal->id = id;
+    strcpy(newAnimal->name, name);
+    strcpy(newAnimal->species, species);
+    newAnimal->next = NULL;
+
+    if (queue->rear == NULL) {
+        queue->front = queue->rear = newAnimal;
+    } else {
+        queue->rear->next = newAnimal;
+        queue->rear = newAnimal;
+    }
+
+    printf("Animal added successfully.\n");
+}
+
+// Dequeue function for removing an animal
+Animal* dequeue(AnimalQueue* queue) {
+    if (queue->front == NULL) return NULL;
+
+    Animal* temp = queue->front;
+    queue->front = queue->front->next;
+
+    if (queue->front == NULL) {
+        queue->rear = NULL;
+    }
+
+    return temp;
+}
+
+// Function to list all animals in the queue
+void listAnimals(AnimalQueue* queue) {
+    if (queue->front == NULL) {
+        printf("No animals in the shelter.\n");
+        return;
+    }
+
+    Animal* current = queue->front;
+    while (current != NULL) {
+        printf("ID: %d, Name: %s, Species: %s\n",
+               current->id, current->name, current->species);
+        current = current->next;
+    }
+}
+
+// Function to display the menu
+void menu() {
+    printf("\nAnimal Shelter Management System\n");
+    printf("1. Add Animal\n");
+    printf("2. Remove Animal\n");
+    printf("3. List Animals\n");
+    printf("4. Exit\n");
+}
